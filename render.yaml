@@ -3,7 +3,7 @@ services:
     name: mosque
     env: node
     plan: free
-buildCommand: cd islamic_school && npm install
+    buildCommand: cd islamic_school && npm install
     startCommand: npm start
     envVars:
       - key: NODE_VERSION
