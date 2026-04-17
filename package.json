@@ -2,16 +2,17 @@
   "name": "mosque",
   "version": "1.0.0",
   "description": "Islamic School Management System - Mosque Edition",
-  "main": "islamic_school/server.js",
+  "main": "server.js",
   "scripts": {
-"start": "node server.js"
-    "dev": "nodemon islamic_school/server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
+    "dotenv": "^16.6.1",
     "express": "^4.18.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.0"
+    "nodemon": "^3.1.11"
   },
   "engines": {
     "node": ">=18.0.0"
