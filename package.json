@@ -4,8 +4,8 @@
   "description": "Islamic School Management System - Mosque Edition",
   "main": "islamic_school/server.js",
   "scripts": {
-    "start": "cd islamic_school && node server.js",
-    "dev": "cd islamic_school && nodemon server.js"
+"start": "node islamic_school/server.js"
+"dev": "nodemon islamic_school/server.js"
   },
   "dependencies": {
     "express": "^4.18.0"
