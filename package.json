@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "cd islamic_school && npm start",
-    "dev": "cd islamic_school && npm run dev"
+    "dev": "cd islamic_school && npm run dev",
+    "postinstall": "cd islamic_school && npm install"
   },
   "dependencies": {
     "dotenv": "^16.6.1"
