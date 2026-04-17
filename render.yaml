@@ -3,6 +3,6 @@ services:
     name: mosque
     env: node
     plan: free
-    buildCommand: npm install
-    startCommand: node server.js
+    buildCommand: cd islamic_school && npm ci
+    startCommand: cd islamic_school && npm start
 
