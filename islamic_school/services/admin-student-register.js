@@ -1,0 +1,90 @@
+const bcrypt = require('bcrypt');
+const db = require('../config/db');
+
+/**
+ * Admin creates new student account (no payment required)
+ * @param {Object} studentData - {first_name, last_name, email, password, class_name, ...}
+ * @returns {Promise<{success: bool, admission_number: string, error: string|null}>}
+ */
+async function createStudentByAdmin(studentData) {
+    console.log('📝 ========== ADMIN STUDENT REGISTRATION START ==========');
+
+    const first_name = (studentData.first_name || '').trim();
+    const last_name = (studentData.last_name || '').trim();
+    const email = (studentData.email || '').trim().toLowerCase();
+    const password = studentData.password || '';
+    const class_name = (studentData.class_name || '').trim() || null;
+    const date_of_birth = studentData.date_of_birth || null;
+    const gender = (studentData.gender || '').trim() || null;
+    const parent_name = (studentData.parent_name || '').trim() || null;
+    const parent_phone = (studentData.parent_phone || '').trim() || null;
+    const address = (studentData.address || '').trim() || null;
+    const picturePath = studentData.picturePath || null;
+
+    console.log('📋 Received data:', {
+      first_name,
+      last_name,
+      email,
+      password: '***',
+      class_name
+    });
+
+    // Validation (strict after trim)
+    if (!first_name) {
+        console.warn('❌ Missing first_name');
+        return { success: false, error: 'First name is required' };
+    }
+    if (!last_name) {
+        console.warn('❌ Missing last_name');
+        return { success: false, error: 'Last name is required' };
+    }
+    if (!email) {
+        console.warn('❌ Missing email');
+        return { success: false, error: 'Email is required' };
+    }
+    if (!password) {
+        console.warn('❌ Missing password');
+        return { success: false, error: 'Password is required' };
+    }
+    if (password.length < 6) {
+        return { success: false, error: 'Password must be at least 6 characters' };
+    }
+
+    try {
+        // Check email exists
+        const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+        if (existing.rows.length > 0) {
+            return { success: false, error: 'Email already registered' };
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Generate admission_number
+        const year = new Date().getFullYear();
+        const countResult = await db.query('SELECT COUNT(*) FROM students WHERE admission_number LIKE $1', [`STU${year}%`]);
+        const count = parseInt(countResult.rows[0].count) + 1;
+        const admission_number = `STU${year}${count.toString().padStart(3, '0')}`;
+
+        // Create user
+        const userResult = await db.query(
+            'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id',
+            [email, email, hashedPassword, 'student']
+        );
+        const user_id = userResult.rows[0].id;
+
+        // Create student
+        await db.query(
+            `INSERT INTO students (user_id, admission_number, first_name, last_name, email, date_of_birth, gender, picture, class, parent_name, parent_phone, address)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+            [user_id, admission_number, first_name, last_name, email, date_of_birth || null, gender || null, picturePath || null, class_name || null, parent_name || null, parent_phone || null, address || null]
+        );
+
+        return { success: true, admission_number };
+    } catch (error) {
+        console.error('Admin student registration error:', error);
+        return { success: false, error: 'Database error: ' + error.message };
+    }
+}
+
+module.exports = { createStudentByAdmin };
